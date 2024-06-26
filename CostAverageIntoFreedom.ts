@@ -30,51 +30,57 @@ export class CostAverageIntoFreedom {
         this.costAverageIntoFreedomC = costAverageIntoFreedomC
     }
 
-    public async costAverageIntoFreedom(intervalInSeconds: number, deposit: boolean) {
+    public async costAverageIntoFreedom(accumulationIntervalInSeconds: number, minAccumulationIntervalInBlocks: number) {
 
         await this.prepareSender()
 
         let tx
 
-        if (deposit) {
+        if (minAccumulationIntervalInBlocks > 0) {
 
             const perPurchasePerRecipientAmount = BigInt(6 * 10 ** 18)
             const amount = BigInt(3) * perPurchasePerRecipientAmount
-            tx = await this.costAverageIntoFreedomC.deposit(intervalInSeconds, perPurchasePerRecipientAmount, Freiheit, [this.sender], { value: amount })
+            tx = await this.costAverageIntoFreedomC.deposit(minAccumulationIntervalInBlocks, perPurchasePerRecipientAmount, Freiheit, [this.sender], { value: amount })
             this.logger.info(`deposit for Freiheit tx: ${tx.hash}`)
             await tx.wait()
-            tx = await this.costAverageIntoFreedomC.deposit(intervalInSeconds, perPurchasePerRecipientAmount, Friede, [this.sender], { value: amount })
+            tx = await this.costAverageIntoFreedomC.deposit(minAccumulationIntervalInBlocks, perPurchasePerRecipientAmount, Friede, [this.sender], { value: amount })
             this.logger.info(`deposit for Friede tx: ${tx.hash}`)
             await tx.wait()
-            tx = await this.costAverageIntoFreedomC.deposit(intervalInSeconds, perPurchasePerRecipientAmount, Geld, [this.sender], { value: amount })
+            tx = await this.costAverageIntoFreedomC.deposit(minAccumulationIntervalInBlocks, perPurchasePerRecipientAmount, Geld, [this.sender], { value: amount })
             this.logger.info(`deposit for Geo Cash tx: ${tx.hash}`)
             await tx.wait()
 
-        } else {
+        } else if (accumulationIntervalInSeconds > 0) {
 
             while (this.assetRocks) {
-                const depositIDs = await this.costAverageIntoFreedomC.getDepositIDs()
-                this.logger.info(`depositIDs: ${depositIDs}`)
-                for (const id of depositIDs) {
-                    try {
-                        const deposit = await this.costAverageIntoFreedomC.deposits(id)
-                        // this.logger.info(deposit)
-                        const input = deposit[1]
-                        const swapped = deposit[3]
-                        this.logger.info(input)
-                        this.logger.info(swapped)
-                        if (input > swapped) {
-                            tx = await this.costAverageIntoFreedomC.trigger(id, 10000, 1)
-                            this.logger.info(`trigger tx: ${tx.hash}`)
-                            await tx.wait()
+                try {
+                    const depositIDs = await this.costAverageIntoFreedomC.getDepositIDs()
+                    this.logger.info(`depositIDs: ${depositIDs}`)
+                    for (const id of depositIDs) {
+                        try {
+                            const deposit = await this.costAverageIntoFreedomC.deposits(id)
+                            // this.logger.info(deposit)
+                            const input = deposit[1]
+                            const swapped = deposit[3]
+                            this.logger.info(input)
+                            this.logger.info(swapped)
+                            if (input > swapped) {
+                                tx = await this.costAverageIntoFreedomC.trigger(id, 10000, 1)
+                                this.logger.info(`trigger tx: ${tx.hash}`)
+                                await tx.wait()
+                            }
+                        } catch (error) {
+                            this.logger.info("frei")
                         }
-                    } catch (error) {
-                        this.logger.info("frei")
                     }
+                    await sleep(accumulationIntervalInSeconds)
+                } catch (error) {
+                    this.logger.error(error.message)
                 }
-                await sleep(intervalInSeconds)
             }
 
+        } else {
+            throw new Error("Please check your parameterization")
         }
     }
 
