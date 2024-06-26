@@ -37,16 +37,11 @@ export async function getContract(contractAddress: string, provider: any, url: s
 }
 export function getProviderURL(logger: Logger): string {
     let configuration: any = {}
-    if (Deno.args[0] !== undefined) { // supplying your provider URL via parameter
-        return Deno.args[0]
-    } else { // ... or via .env.json
-        try {
-            configuration = JSON.parse(Deno.readTextFileSync('./.env.json'))
-            return configuration.providerURL
-        } catch (error) {
-            logger.error(error.message)
-            logger.error("without a providerURL I cannot connect to the blockchain")
-        }
+    try {
+        configuration = JSON.parse(Deno.readTextFileSync('./.env.json'))
+        return configuration.providerURL
+    } catch (error) {
+        logger.error(error.message)
+        logger.error("without a providerURL I cannot connect to the blockchain")
     }
-    throw new Error("could not get a providerURL")
 }

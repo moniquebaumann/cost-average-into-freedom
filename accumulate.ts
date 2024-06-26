@@ -2,5 +2,5 @@ import { CostAverageIntoFreedom } from "./CostAverageIntoFreedom.ts"
 
 setTimeout(async () => {
     const costAverageIntoFreedom = await CostAverageIntoFreedom.getInstance()
-    await costAverageIntoFreedom.costAverageIntoFreedom(1000, 0)
+    await costAverageIntoFreedom.costAverageIntoFreedom(Deno.args[0], Deno.args[1])
 }, 360)
