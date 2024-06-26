@@ -1,4 +1,5 @@
-# Distance Calculator
+# Cost Average Into Freedom
+🦕 module to cost average into [FreedomCash.org](https://FreedomCash.org).
 
 ## Usage Example
 
