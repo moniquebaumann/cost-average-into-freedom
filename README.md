@@ -1,9 +1,9 @@
 # Cost Average Into Freedom
 🦕 module to cost average into [FreedomCash.org](https://FreedomCash.org).
 
-## Usage Example
-
 Please always experiment with very small amounts first.
+
+## Usage Examples
 
 ### Deposit
 ```sh
