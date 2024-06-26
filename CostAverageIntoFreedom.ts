@@ -30,27 +30,27 @@ export class CostAverageIntoFreedom {
         this.costAverageIntoFreedomC = costAverageIntoFreedomC
     }
 
-    public async costAverageIntoFreedom(accumulationIntervalInSeconds: number, minAccumulationIntervalInBlocks: number) {
+    public async costAverageIntoFreedom(accumulationIntervalInSeconds: number, minAccumulationIntervalInBlocks: number, perPurchasePerRecipientAmount: number, numberOfSteps: number) {
 
         await this.prepareSender()
 
         let tx
 
-        if (minAccumulationIntervalInBlocks > 0) {
+        if (minAccumulationIntervalInBlocks > 0 && accumulationIntervalInSeconds == 0 && perPurchasePerRecipientAmount > 0 && numberOfSteps > 1) {
 
-            const perPurchasePerRecipientAmount = BigInt(6 * 10 ** 18)
-            const amount = BigInt(3) * perPurchasePerRecipientAmount
-            tx = await this.costAverageIntoFreedomC.deposit(minAccumulationIntervalInBlocks, perPurchasePerRecipientAmount, Freiheit, [this.sender], { value: amount })
+            
+            const amount = BigInt(numberOfSteps) * BigInt(perPurchasePerRecipientAmount * 10 ** 18)
+            tx = await this.costAverageIntoFreedomC.deposit(minAccumulationIntervalInBlocks, BigInt(perPurchasePerRecipientAmount * 10 ** 18), Freiheit, [this.sender], { value: amount })
             this.logger.info(`deposit for Freiheit tx: ${tx.hash}`)
             await tx.wait()
-            tx = await this.costAverageIntoFreedomC.deposit(minAccumulationIntervalInBlocks, perPurchasePerRecipientAmount, Friede, [this.sender], { value: amount })
+            tx = await this.costAverageIntoFreedomC.deposit(minAccumulationIntervalInBlocks, BigInt(perPurchasePerRecipientAmount * 10 ** 18), Friede, [this.sender], { value: amount })
             this.logger.info(`deposit for Friede tx: ${tx.hash}`)
             await tx.wait()
-            tx = await this.costAverageIntoFreedomC.deposit(minAccumulationIntervalInBlocks, perPurchasePerRecipientAmount, Geld, [this.sender], { value: amount })
+            tx = await this.costAverageIntoFreedomC.deposit(minAccumulationIntervalInBlocks, BigInt(perPurchasePerRecipientAmount * 10 ** 18), Geld, [this.sender], { value: amount })
             this.logger.info(`deposit for Geo Cash tx: ${tx.hash}`)
             await tx.wait()
 
-        } else if (accumulationIntervalInSeconds > 0) {
+        } else if (accumulationIntervalInSeconds > 0 && minAccumulationIntervalInBlocks == 0) {
 
             while (this.assetRocks) {
                 try {
